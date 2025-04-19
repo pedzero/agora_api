@@ -4,6 +4,8 @@ import helmet from 'helmet';
 import cors from 'cors';
 import { loadEnv } from './config/env.js';
 
+import authModule from './modules/auth/auth.module.js';
+
 const app = express();
 loadEnv();
 
@@ -16,5 +18,7 @@ app.use(express.json());
 app.get('/', (request, response) => {
     response.json({ message: 'Hello, World!' });
 });
+
+app.use(authModule);
 
 export default app;
