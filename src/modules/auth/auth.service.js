@@ -46,7 +46,10 @@ export async function login({ email, password }) {
         throw new UnauthorizedError('Invalid credentials');
     }
 
-    const token = generateToken({ sub: user.id });
+    const token = generateToken({
+        sub: user.id,
+        email: user.email
+    });
 
     return {
         token,
