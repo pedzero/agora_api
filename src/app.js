@@ -5,6 +5,7 @@ import cors from 'cors';
 import { loadEnv } from './config/env.js';
 
 import authModule from './modules/auth/auth.module.js';
+import { errorHandler } from './middlewares/errorHandler.js';
 
 const app = express();
 loadEnv();
@@ -20,5 +21,6 @@ app.get('/', (request, response) => {
 });
 
 app.use(authModule);
+app.use(errorHandler); 
 
 export default app;
