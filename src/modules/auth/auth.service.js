@@ -1,12 +1,17 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from '../../lib/prisma.js';
 import { generateToken } from '../../lib/jwt.js';
+import { BadRequestError, UnauthorizedError, ConflictError } from '../../utils/errors.js';
 
 export async function register({ name, email, password }) {
+    if (!name || !email || !password) {
+        throw new BadRequestError('Missing required fields');
+    }
+
     const existingUser = await prisma.user.findUnique({ where: { email } });
 
     if (existingUser) {
-        throw new Error('Email is already in use');
+        throw new ConflictError('Email is already in use');
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -32,13 +37,13 @@ export async function login({ email, password }) {
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
-        throw new Error('Invalid credentials');
+        throw new UnauthorizedError('Invalid credentials');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isPasswordValid) {
-        throw new Error('Invalid credentials');
+        throw new UnauthorizedError('Invalid credentials');
     }
 
     const token = generateToken({ sub: user.id });
