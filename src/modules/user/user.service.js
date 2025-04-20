@@ -68,3 +68,21 @@ export async function deleteOwnProfile(userId) {
 
     return { message: 'User deleted successfully' };
 }
+
+export async function searchUsersByUsername(query) {
+    if (!query) return [{}];
+
+    return prisma.user.findMany({
+        where: {
+            username: {
+                contains: query
+            }
+        },
+        select: {
+            id: true,
+            name: true,
+            username: true,
+            profilePicture: true
+        }
+    });
+}

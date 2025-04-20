@@ -35,3 +35,15 @@ export async function deleteOwnProfile(request, response, next) {
         return next(error);
     }
 }
+
+export async function searchUsers(request, response, next) {
+    try {
+        const { username } = request.query;
+
+        const users = await UserService.searchUsersByUsername(username);
+        return response.json({ users });
+
+    } catch (error) {
+        next(error);
+    }
+}
