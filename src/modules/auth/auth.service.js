@@ -3,15 +3,19 @@ import { prisma } from '../../lib/prisma.js';
 import { generateToken } from '../../lib/jwt.js';
 import { BadRequestError, UnauthorizedError, ConflictError } from '../../utils/errors.js';
 
-export async function register({ name, email, password }) {
-    if (!name || !email || !password) {
+export async function register({ name, email, password, username, profilePicture }) {
+    if (!name || !email || !password || !username) {
         throw new BadRequestError('Missing required fields');
     }
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
-
     if (existingUser) {
         throw new ConflictError('Email is already in use');
+    }
+
+    const existingUsername = await prisma.user.findUnique({ where: { username } });
+    if (existingUsername) {
+        throw new ConflictError('Username is already in use');
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -20,12 +24,16 @@ export async function register({ name, email, password }) {
         data: {
             name,
             email,
+            username,
+            profilePicture,
             passwordHash,
         },
         select: {
             id: true,
             name: true,
             email: true,
+            username: true,
+            profilePicture: true,
             createdAt: true,
         }
     });
