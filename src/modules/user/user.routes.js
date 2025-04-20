@@ -5,7 +5,7 @@ import * as UserController from './user.controller.js';
 const router = Router();
 
 router.get('/me', authenticate, UserController.getOwnProfile);
-//update
+router.patch('/me', authenticate, UserController.updateOwnProfile);
 //delete
 
 export default router;
