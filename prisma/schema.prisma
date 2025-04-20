@@ -17,4 +17,18 @@ model User {
   profilePicture String?  
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  following      Follower[] @relation("Following")
+  followers      Follower[] @relation("Followers")
+}
+
+model Follower {
+  followerId Int
+  followingId Int
+
+  follower   User @relation("Following", fields: [followerId], references: [id])
+  following  User @relation("Followers", fields: [followingId], references: [id])
+
+  @@id([followerId, followingId])
+  @@map("followers")
 }
