@@ -50,3 +50,19 @@ export async function updateOwnProfile(userId, data) {
 
     return updatedUser;
 }
+
+export async function deleteOwnProfile(userId) {
+    const user = await prisma.user.findUnique({
+        where: { id: userId }
+    });
+
+    if (!user) {
+        throw new NotFoundError('User not found');
+    }
+
+    await prisma.user.delete({
+        where: { id: userId }
+    });
+
+    return { message: 'User deleted successfully' };
+}

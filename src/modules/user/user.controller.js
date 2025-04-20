@@ -25,3 +25,13 @@ export async function updateOwnProfile(request, response, next) {
         return next(error);
     }
 }
+
+export async function deleteOwnProfile(request, response, next) {
+    try {
+        const userId = request.user.id;
+        const result = await UserService.deleteOwnProfile(userId);
+        return response.status(200).json(result);
+    } catch (error) {
+        return next(error);
+    }
+}

@@ -6,6 +6,6 @@ const router = Router();
 
 router.get('/me', authenticate, UserController.getOwnProfile);
 router.patch('/me', authenticate, UserController.updateOwnProfile);
-//delete
+router.delete('/me', authenticate, UserController.deleteOwnProfile);
 
 export default router;
