@@ -9,6 +9,8 @@ export async function getOwnProfile(userId) {
             id: true,
             name: true,
             email: true,
+            username: true,
+            profilePicture: true,
             createdAt: true,
         },
     });
