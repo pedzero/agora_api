@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from '../../lib/prisma.js';
 import { BadRequestError, ConflictError, NotFoundError } from '../../utils/errors.js';
+import { blacklistToken } from '../../lib/blacklist.js';
 
 export async function getOwnProfile(userId) {
     const user = await prisma.user.findUnique({
@@ -53,7 +54,7 @@ export async function updateOwnProfile(userId, data) {
     return updatedUser;
 }
 
-export async function deleteOwnProfile(userId) {
+export async function deleteOwnProfile(userId, token) {
     const user = await prisma.user.findUnique({
         where: { id: userId }
     });
@@ -65,6 +66,10 @@ export async function deleteOwnProfile(userId) {
     await prisma.user.delete({
         where: { id: userId }
     });
+
+    if (token) {
+        await blacklistToken(token);
+    }
 
     return { message: 'User deleted successfully' };
 }

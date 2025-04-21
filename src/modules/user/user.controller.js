@@ -1,3 +1,4 @@
+import { getTokenFromHeader } from '../../utils/token.js';
 import { updateSchema } from './user.schema.js';
 import * as UserService from './user.service.js';
 
@@ -29,7 +30,8 @@ export async function updateOwnProfile(request, response, next) {
 export async function deleteOwnProfile(request, response, next) {
     try {
         const userId = request.user.id;
-        const result = await UserService.deleteOwnProfile(userId);
+        const token = getTokenFromHeader(request);
+        const result = await UserService.deleteOwnProfile(userId, token);
         return response.status(200).json(result);
     } catch (error) {
         return next(error);
