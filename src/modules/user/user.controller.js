@@ -42,7 +42,17 @@ export async function searchUsers(request, response, next) {
 
         const users = await UserService.searchUsersByUsername(username);
         return response.json({ users });
+    } catch (error) {
+        next(error);
+    }
+}
 
+export async function getUser(request, response, next) {
+    try {
+        const { username } = request.params;
+
+        const user = await UserService.getUserByUsername(username);
+        return response.json({ user });
     } catch (error) {
         next(error);
     }

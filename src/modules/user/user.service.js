@@ -87,6 +87,22 @@ export async function searchUsersByUsername(query) {
     });
 }
 
+export async function getUserByUsername(username) {
+    if (!username) {
+        throw new BadRequestError('Username is required');
+    }
+
+    return await prisma.user.findUnique({
+        where: { username },
+        select: {
+            id: true,
+            name: true,
+            username: true,
+            profilePicture: true
+        }
+    });
+}
+
 export async function getFollowersByUsername(username) {
     const user = await prisma.user.findUnique({
         where: { username },

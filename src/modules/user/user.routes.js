@@ -9,6 +9,7 @@ router.patch('/me', authenticate, UserController.updateOwnProfile);
 router.delete('/me', authenticate, UserController.deleteOwnProfile);
 
 router.get('/search', authenticate, UserController.searchUsers);
+router.get('/:username', authenticate, UserController.getUser);
 
 router.get('/:username/followers', authenticate, UserController.getFollowers);
 router.get('/:username/followings', authenticate, UserController.getFollowings);
