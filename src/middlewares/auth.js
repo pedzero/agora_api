@@ -1,8 +1,9 @@
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET } from '../config/env.js'; 
+import { JWT_SECRET } from '../config/env.js';
 import { UnauthorizedError } from '../utils/errors.js';
+import { isTokenBlacklisted } from '../lib/blacklist.js';
 
-export function authenticate(request, response, next) {
+export async function authenticate(request, response, next) {
     const authHeader = request.headers.authorization;
 
     if (!authHeader?.startsWith('Bearer ')) {
@@ -10,6 +11,10 @@ export function authenticate(request, response, next) {
     }
 
     const token = authHeader.split(' ')[1];
+
+    if (await isTokenBlacklisted(token)) {
+        return response.status(401).json({ error: 'Token revoked' });
+    }
 
     try {
         const payload = jwt.verify(token, JWT_SECRET);
