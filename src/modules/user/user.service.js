@@ -86,3 +86,30 @@ export async function searchUsersByUsername(query) {
         }
     });
 }
+
+export async function getFollowersByUsername(username) {
+    const user = await prisma.user.findUnique({
+        where: { username },
+        select: { id: true }
+    });
+
+    if (!user) {
+        throw new NotFoundError('User not found');
+    }
+
+    const followers = await prisma.follower.findMany({
+        where: { followingId: user.id },
+        include: {
+            follower: {
+                select: {
+                    id: true,
+                    name: true,
+                    username: true,
+                    profilePicture: true
+                }
+            }
+        }
+    });
+
+    return followers.map(entry => entry.follower);
+}

@@ -10,4 +10,10 @@ router.delete('/me', authenticate, UserController.deleteOwnProfile);
 
 router.get('/search', authenticate, UserController.searchUsers);
 
+router.get('/:username/followers', authenticate, UserController.getFollowers);
+
+// GET /users/:username/following
+// POST /users/:username/follow
+// DELETE /users/:username/follow
+
 export default router;

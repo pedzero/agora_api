@@ -47,3 +47,13 @@ export async function searchUsers(request, response, next) {
         next(error);
     }
 }
+
+export async function getFollowers(request, response, next) {
+    try {
+        const { username } = request.params;
+        const followers = await UserService.getFollowersByUsername(username);
+        return response.json({ followers });
+    } catch (error) {
+        return next(error);
+    }
+}
