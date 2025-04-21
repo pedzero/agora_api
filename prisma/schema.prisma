@@ -26,8 +26,8 @@ model Follower {
   followerId Int
   followingId Int
 
-  follower   User @relation("Following", fields: [followerId], references: [id])
-  following  User @relation("Followers", fields: [followingId], references: [id])
+  follower   User @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  following  User @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
 
   @@id([followerId, followingId])
   @@map("followers")
