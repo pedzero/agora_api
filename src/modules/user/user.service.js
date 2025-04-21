@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from '../../lib/prisma.js';
-import { NotFoundError } from '../../utils/errors.js';
+import { BadRequestError, ConflictError, NotFoundError } from '../../utils/errors.js';
 
 export async function getOwnProfile(userId) {
     const user = await prisma.user.findUnique({
@@ -139,4 +139,57 @@ export async function getFollowingsByUsername(username) {
     });
 
     return followings.map(entry => entry.following);
+}
+
+export async function followUserByUsername(currentUserId, username) {
+    // TODO: revoke deleted users tokens
+    const currentUser = await prisma.user.findUnique({
+        where: { id: currentUserId }
+    });
+
+    if (!currentUser) {
+        throw new NotFoundError('Current user not found');
+    }
+
+    const targetUser = await prisma.user.findUnique({
+        where: { username },
+        select: { id: true }
+    });
+
+    if (!targetUser) {
+        throw new NotFoundError('Target user not found');
+    }
+
+    if (currentUserId === targetUser.id) {
+        throw new BadRequestError('You cannot follow yourself');
+    }
+
+    const alreadyFollowing = await prisma.follower.findUnique({
+        where: {
+            followerId_followingId: {
+                followerId: currentUserId,
+                followingId: targetUser.id
+            }
+        }
+    });
+
+    if (alreadyFollowing) {
+        throw new ConflictError('Target user already followed');
+    }
+
+    await prisma.follower.create({
+        data: {
+            followerId: currentUserId,
+            followingId: targetUser.id
+        },
+        select: {
+            followerId: true,
+            followingId: true
+        }
+    });
+
+    return {
+        message: `You are now following @${username}`,
+        following: username
+    };
 }

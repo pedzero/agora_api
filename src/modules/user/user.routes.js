@@ -12,8 +12,8 @@ router.get('/search', authenticate, UserController.searchUsers);
 
 router.get('/:username/followers', authenticate, UserController.getFollowers);
 router.get('/:username/followings', authenticate, UserController.getFollowings);
+router.post('/:username/follow', authenticate, UserController.follow);
 
-// POST /users/:username/follow
 // DELETE /users/:username/follow
 
 export default router;
