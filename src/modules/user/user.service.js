@@ -113,3 +113,30 @@ export async function getFollowersByUsername(username) {
 
     return followers.map(entry => entry.follower);
 }
+
+export async function getFollowingsByUsername(username) {
+    const user = await prisma.user.findUnique({
+        where: { username },
+        select: { id: true }
+    });
+
+    if (!user) {
+        throw new NotFoundError('User not found');
+    }
+
+    const followings = await prisma.follower.findMany({
+        where: { followerId: user.id },
+        include: {
+            following: {
+                select: {
+                    id: true,
+                    name: true,
+                    username: true,
+                    profilePicture: true
+                }
+            }
+        }
+    });
+
+    return followings.map(entry => entry.following);
+}

@@ -57,3 +57,13 @@ export async function getFollowers(request, response, next) {
         return next(error);
     }
 }
+
+export async function getFollowings(request, response, next) {
+    try {
+        const { username } = request.params;
+        const followings = await UserService.getFollowingsByUsername(username);
+        return response.json({ followings });
+    } catch (error) {
+        return next(error);
+    }
+}

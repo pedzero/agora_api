@@ -11,8 +11,8 @@ router.delete('/me', authenticate, UserController.deleteOwnProfile);
 router.get('/search', authenticate, UserController.searchUsers);
 
 router.get('/:username/followers', authenticate, UserController.getFollowers);
+router.get('/:username/followings', authenticate, UserController.getFollowings);
 
-// GET /users/:username/following
 // POST /users/:username/follow
 // DELETE /users/:username/follow
 
