@@ -2,15 +2,14 @@ import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../config/env.js';
 import { UnauthorizedError } from '../utils/errors.js';
 import { isTokenBlacklisted } from '../lib/blacklist.js';
+import { getTokenFromHeader } from '../utils/token.js';
 
 export async function authenticate(request, response, next) {
-    const authHeader = request.headers.authorization;
-
-    if (!authHeader?.startsWith('Bearer ')) {
+    const token = getTokenFromHeader(request);
+    
+    if (!token) {
         throw new UnauthorizedError('Missing or invalid authorization header');
     }
-
-    const token = authHeader.split(' ')[1];
 
     if (await isTokenBlacklisted(token)) {
         return response.status(401).json({ error: 'Token revoked' });

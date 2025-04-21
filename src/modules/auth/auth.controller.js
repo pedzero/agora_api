@@ -1,6 +1,7 @@
 import { registerSchema, loginSchema } from "./auth.schema.js";
 import * as AuthService from "./auth.service.js";
 import { blacklistToken } from "../../lib/blacklist.js";
+import { getTokenFromHeader } from "../../utils/token.js";
 
 export async function register(request, response, next) {
     try {
@@ -30,10 +31,11 @@ export async function login(request, response, next) {
 
 export async function logout(request, response, next) {
     try {
-        const token = request.headers.authorization?.split(' ')[1];
+        const token = getTokenFromHeader(request);
         if (token) {
             await blacklistToken(token);
         }
+        
         return response.status(200).json({ message: 'Logged out successfully' });
     } catch (error) {
         return next(error);
