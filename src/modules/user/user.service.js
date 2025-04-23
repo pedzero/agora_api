@@ -159,15 +159,6 @@ export async function getFollowingsByUsername(username) {
 }
 
 export async function followUserByUsername(currentUserId, username) {
-    // TODO: revoke deleted users tokens
-    const currentUser = await prisma.user.findUnique({
-        where: { id: currentUserId }
-    });
-
-    if (!currentUser) {
-        throw new NotFoundError('Current user not found');
-    }
-
     const targetUser = await prisma.user.findUnique({
         where: { username },
         select: { id: true }
@@ -212,15 +203,6 @@ export async function followUserByUsername(currentUserId, username) {
 }
 
 export async function unfollowUserByUsername(currentUserId, username) {
-    // TODO: revoke deleted users tokens
-    const currentUser = await prisma.user.findUnique({
-        where: { id: currentUserId }
-    });
-
-    if (!currentUser) {
-        throw new NotFoundError('Current user not found');
-    }
-
     const targetUser = await prisma.user.findUnique({
         where: { username },
         select: { id: true }
