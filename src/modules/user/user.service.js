@@ -84,7 +84,6 @@ export async function searchUsersByUsername(query) {
             }
         },
         select: {
-            id: true,
             name: true,
             username: true,
             profilePicture: true
@@ -100,7 +99,6 @@ export async function getUserByUsername(username) {
     return await prisma.user.findUnique({
         where: { username },
         select: {
-            id: true,
             name: true,
             username: true,
             profilePicture: true
@@ -123,7 +121,6 @@ export async function getFollowersByUsername(username) {
         include: {
             follower: {
                 select: {
-                    id: true,
                     name: true,
                     username: true,
                     profilePicture: true
@@ -150,7 +147,6 @@ export async function getFollowingsByUsername(username) {
         include: {
             following: {
                 select: {
-                    id: true,
                     name: true,
                     username: true,
                     profilePicture: true
