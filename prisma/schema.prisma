@@ -18,6 +18,7 @@ model User {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
+  posts           Post[]
   following      Follower[] @relation("Following")
   followers      Follower[] @relation("Followers")
 }
@@ -31,4 +32,25 @@ model Follower {
 
   @@id([followerId, followingId])
   @@map("followers")
+}
+
+model Post {
+  id          String    @id @default(uuid())
+  description String?
+  latitude    Float
+  longitude   Float
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  photos      Photo[]
+}
+
+model Photo {
+  id        String   @id @default(uuid())
+  url       String
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
