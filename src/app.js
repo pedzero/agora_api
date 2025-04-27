@@ -5,6 +5,7 @@ import cors from 'cors';
 
 import authModule from './modules/auth/auth.module.js';
 import userModule from './modules/user/user.module.js';
+import postModule from './modules/post/post.module.js';
 
 import { errorHandler } from './middlewares/errorHandler.js';
 
@@ -18,6 +19,7 @@ app.use(express.json());
 // routes
 app.use(authModule);
 app.use(userModule);
+app.use(postModule);
 
 app.use(errorHandler);
 

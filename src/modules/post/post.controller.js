@@ -1,0 +1,31 @@
+import { createPostSchema } from './post.schema.js';
+import * as PostService from './post.service.js';
+import { z } from 'zod';
+
+export async function createPost(request, response, next) {
+    try {
+        request.body.latitude = parseFloat(request.body.latitude);
+        request.body.longitude = parseFloat(request.body.longitude);
+
+        const data = createPostSchema.parse(request.body);
+        data.userId = request.user.id;
+
+        if (!request.files || request.files.length === 0) {
+            return response.status(400).json({ error: 'At least one photo must be uploaded.' });
+        }
+
+        if (request.files.length > 3) {
+            return res.status(400).json({ error: 'You can upload up to 3 photos per post.' });
+        }
+
+        data.files = request.files;
+
+        const post = await PostService.createPost(data);
+        response.status(201).json(post);
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            return response.status(400).json({ errors: error.errors });
+        }
+        next(error);
+    }
+}
