@@ -16,6 +16,7 @@ export async function updateOwnProfile(request, response, next) {
     try {
         const userId = request.user.id;
         const validatedData = updateSchema.parse(request.body);
+        validatedData.profilePicture = request.file;
 
         const updatedUser = await UserService.updateOwnProfile(userId, validatedData);
         return response.status(200).json({ user: updatedUser });

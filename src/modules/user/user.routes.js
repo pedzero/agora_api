@@ -1,11 +1,13 @@
 import { Router } from 'express';
+import multer from 'multer';
 import { authenticate } from '../../middlewares/auth.js';
 import * as UserController from './user.controller.js';
 
 const router = Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.get('/me', authenticate, UserController.getOwnProfile);
-router.patch('/me', authenticate, UserController.updateOwnProfile);
+router.patch('/me', authenticate, upload.single('profilePicture'), UserController.updateOwnProfile);
 router.delete('/me', authenticate, UserController.deleteOwnProfile);
 
 router.get('/search', authenticate, UserController.searchUsers);

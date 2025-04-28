@@ -2,6 +2,8 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '../../lib/prisma.js';
 import { BadRequestError, ConflictError, NotFoundError } from '../../utils/errors.js';
 import { blacklistToken } from '../../lib/blacklist.js';
+import { deleteImage, uploadImage } from '../../lib/upload.js';
+import { getFileNameFromURL } from '../../utils/filename.js';
 
 export async function getOwnProfile(userId) {
     const user = await prisma.user.findUnique({
@@ -36,6 +38,15 @@ export async function updateOwnProfile(userId, data) {
     if (data.username && data.username !== user.username) {
         const existing = await prisma.user.findUnique({ where: { username: data.username } });
         if (existing) throw new ConflictError('Username already taken');
+    }
+
+    if (data.profilePicture) {
+        const fileName = getFileNameFromURL(user.profilePicture);
+        if (fileName) {
+            await deleteImage(fileName);
+        }
+
+        updatedData.profilePicture = await uploadImage(data.profilePicture);
     }
 
     const updatedUser = await prisma.user.update({

@@ -17,5 +17,7 @@ export function errorHandler(error, request, response, next) {
         }
     }
 
+    console.error(`[Error] ${request.method} ${request.url} - ${statusCode} - ${message}`, error);
+
     response.status(statusCode).json({ error: message });
 }
