@@ -4,7 +4,7 @@ import { authenticate } from '../../middlewares/auth.js';
 import * as PostController from './post.controller.js';
 
 const router = Router();
-const upload = multer();
+const upload = multer({ storage: multer.memoryStorage() });
 
 // GET      /users/:username/posts
 

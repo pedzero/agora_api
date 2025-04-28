@@ -1,12 +1,11 @@
 import { prisma } from '../../lib/prisma.js';
-// import { uploadFileToMinIO } from '@/lib/minio.js';
+import { uploadImage } from '../../lib/upload.js';
 
 export async function createPost({ userId, description, latitude, longitude, files }) {
     const uploadedPhotos = [];
 
     for (const file of files) {
-        // const url = await uploadFileToMinIO(file);
-        const url = 'fake_path/' + file.originalname;
+        const url = await uploadImage(file);
 
         uploadedPhotos.push(url);
     }
