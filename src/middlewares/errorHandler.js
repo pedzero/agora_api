@@ -1,10 +1,21 @@
+import multer from 'multer';
 import { AppError } from '../utils/errors.js';
 
 export function errorHandler(error, request, response, next) {
-    const statusCode = error instanceof AppError ? error.statusCode : 500;
-    const message = error.message || 'Internal server error';
+    let statusCode = error instanceof AppError ? error.statusCode : 500;
+    let message = error.message || 'Internal server error';
 
-    console.error(`[Error] ${request.method} ${request.url} - ${statusCode} - ${message}`);
+    if (error instanceof multer.MulterError) {
+        statusCode = 400;
+
+        if (error.code === 'LIMIT_UNEXPECTED_FILE') {
+            message = 'Too much files sent';
+        } else if (error.code === 'LIMIT_FILE_SIZE') {
+            message = 'The uploaded file size is too large';
+        } else {
+            message = error.message;
+        }
+    }
 
     response.status(statusCode).json({ error: message });
 }
