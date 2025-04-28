@@ -6,6 +6,7 @@ import { getTokenFromHeader } from "../../utils/token.js";
 export async function register(request, response, next) {
     try {
         const validatedData = registerSchema.parse(request.body);
+        validatedData.profilePicture = request.file;
         const result = await AuthService.register(validatedData);
         return response.status(201).json(result);
     } catch (error) {
@@ -35,7 +36,7 @@ export async function logout(request, response, next) {
         if (token) {
             await blacklistToken(token);
         }
-        
+
         return response.status(200).json({ message: 'Logged out successfully' });
     } catch (error) {
         return next(error);

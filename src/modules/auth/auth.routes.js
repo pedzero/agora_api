@@ -1,10 +1,12 @@
 import { Router } from 'express';
-import * as AuthController from './auth.controller.js';
+import multer from 'multer';
 import { authenticate } from '../../middlewares/auth.js';
+import * as AuthController from './auth.controller.js';
 
 const router = Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
-router.post('/register', AuthController.register);
+router.post('/register', upload.single('profilePicture'), AuthController.register);
 router.post('/login', AuthController.login);
 router.post('/logout', authenticate, AuthController.logout);
 
