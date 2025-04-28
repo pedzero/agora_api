@@ -6,7 +6,7 @@ import { AppError } from '../utils/errors.js';
 const BUCKET_NAME = MINIO_BUCKET_NAME || 'agora-media';
 
 export async function uploadImage(file) {
-    const fileName = `${Date.now()}-${file.originalname}`;
+    const fileName = `${Date.now()}-${file.originalname}`.replaceAll(' ', '-');
 
     const params = {
         Bucket: BUCKET_NAME,
