@@ -74,6 +74,11 @@ export async function deleteOwnProfile(userId, token) {
         throw new NotFoundError('User not found');
     }
 
+    const fileName = getFileNameFromURL(user.profilePicture);
+    if (fileName) {
+        await deleteImage(fileName);
+    }
+
     await prisma.user.delete({
         where: { id: userId }
     });
