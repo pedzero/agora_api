@@ -1,4 +1,4 @@
-import { createPostSchema } from './post.schema.js';
+import { createPostSchema, updatePostSchema } from './post.schema.js';
 import * as PostService from './post.service.js';
 import { z } from 'zod';
 
@@ -21,6 +21,23 @@ export async function createPost(request, response, next) {
         data.files = request.files;
 
         const post = await PostService.createPost(data);
+        response.status(201).json(post);
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            return response.status(400).json({ errors: error.errors });
+        }
+        next(error);
+    }
+}
+
+export async function updatePost(request, response, next) {
+    try {
+        const data = updatePostSchema.parse(request.body);
+        data.userId = request.user.id;
+        data.postId = request.params.postId;
+        data.files = request.files;
+
+        const post = await PostService.updatePost(data);
         response.status(201).json(post);
     } catch (error) {
         if (error instanceof z.ZodError) {

@@ -11,3 +11,15 @@ export const createPostSchema = z.object({
         invalid_type_error: 'Longitude must be a number'
     }),
 });
+
+export const updatePostSchema = z.object({
+    description: z.string().max(500).optional(),
+
+    removePhotos: z
+        .preprocess((value) => {
+            if (typeof value === 'string') return [value];
+            if (Array.isArray(value)) return value;
+            return [];
+        }, z.array(z.string().url('Each photo URL must be valid')).max(3, 'Cannot remove more than 3 photos'))
+        .optional(),
+});

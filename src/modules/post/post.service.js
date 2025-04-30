@@ -1,5 +1,7 @@
 import { prisma } from '../../lib/prisma.js';
-import { uploadImage } from '../../lib/upload.js';
+import { deleteImage, uploadImage } from '../../lib/upload.js';
+import { UnauthorizedError } from '../../utils/errors.js';
+import { getFileNameFromURL } from '../../utils/filename.js';
 
 export async function createPost({ userId, description, latitude, longitude, files }) {
     const uploadedPhotos = [];
@@ -31,3 +33,61 @@ export async function createPost({ userId, description, latitude, longitude, fil
 
     return post;
 }
+
+export async function updatePost({ userId, postId, description, removePhotos = [], files = [] }) {
+    const post = await prisma.post.findUnique({
+        where: { id: postId },
+        include: { photos: true },
+    });
+
+    if (!post) throw new NotFoundError('Post not found');
+    if (post.userId !== userId) throw new UnauthorizedError('Post does not belong to the requester');
+
+    const existingPhotoUrls = post.photos.map((photo) => photo.url);
+
+    // check if photos to remove belong to the post
+    for (const photoUrl of removePhotos) {
+        if (!existingPhotoUrls.includes(photoUrl)) {
+            throw new UnauthorizedError('One or more photos to be removed do not belong to this post');
+        }
+    }
+
+    const photosAfterUpdate = existingPhotoUrls.length - removePhotos.length + files.length;
+    if (photosAfterUpdate > 3) {
+        throw new UnauthorizedError('Cannot have more than 3 photos in a post');
+    }
+
+    // delete photos from MinIO and database
+    for (const photoUrl of removePhotos) {
+        const filename = getFileNameFromURL(photoUrl);
+        await deleteImage(filename);
+    }
+
+    await prisma.photo.deleteMany({
+        where: {
+            postId,
+            url: { in: removePhotos },
+        },
+    });
+
+    // upload new photos
+    const uploadedPhotoUrls = [];
+    for (const file of files) {
+        const url = await uploadImage(file);
+        uploadedPhotoUrls.push(url);
+    }
+
+    // update post
+    const updatedPost = await prisma.post.update({
+        where: { id: postId },
+        data: {
+            description,
+            photos: {
+                create: uploadedPhotoUrls.map((url) => ({ url })),
+            },
+        },
+        include: { photos: true },
+    });
+
+    return updatedPost;
+}  
