@@ -46,3 +46,18 @@ export async function updatePost(request, response, next) {
         next(error);
     }
 }
+
+export async function deletePost(request, response, next) {
+    try {
+        const userId = request.user.id;
+        const postId = request.params.postId;
+
+        const message = await PostService.deletePost(userId, postId);
+        response.status(200).json(message);
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            return response.status(400).json({ errors: error.errors });
+        }
+        next(error);
+    }
+}

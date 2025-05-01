@@ -12,6 +12,6 @@ const upload = multer({ storage: multer.memoryStorage() });
 // GET      /feed
 router.post('/', authenticate, upload.array('photos'), PostController.createPost);
 router.patch('/:postId', authenticate, upload.array('photos'), PostController.updatePost);
-// DELETE   /:postId
+router.delete('/:postId', authenticate, PostController.deletePost);
 
 export default router;

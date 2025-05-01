@@ -1,6 +1,6 @@
 import { prisma } from '../../lib/prisma.js';
 import { deleteImage, uploadImage } from '../../lib/upload.js';
-import { UnauthorizedError } from '../../utils/errors.js';
+import { ConflictError, NotFoundError, UnauthorizedError } from '../../utils/errors.js';
 import { getFileNameFromURL } from '../../utils/filename.js';
 
 export async function createPost({ userId, description, latitude, longitude, files }) {
@@ -90,4 +90,32 @@ export async function updatePost({ userId, postId, description, removePhotos = [
     });
 
     return updatedPost;
-}  
+}
+
+export async function deletePost(userId, postId) {
+    const post = await prisma.post.findUnique({
+        where: { id: postId },
+        include: { photos: true },
+    });
+
+    if (!post) {
+        throw new NotFoundError('Post not found');
+    }
+
+    if (post.userId !== userId) {
+        throw new ConflictError('You are not the owner of this post');
+    }
+
+    const photosUrl = post.photos.map((photo) => photo.url);
+
+    for (const url of photosUrl) {
+        const filename = getFileNameFromURL(url);
+        await deleteImage(filename);
+    }
+
+    await prisma.post.delete({
+        where: { id: postId }
+    });
+
+    return { message: 'Post deleted successfully' };
+}
