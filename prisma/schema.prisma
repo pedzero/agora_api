@@ -14,24 +14,31 @@ model User {
   email          String   @unique
   username       String   @unique
   passwordHash   String
-  profilePicture String?  
+  profilePicture String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  posts           Post[]
-  following      Follower[] @relation("Following")
-  followers      Follower[] @relation("Followers")
+  posts          Post[]
+  following      Follow[] @relation("UserFollowing")
+  followers      Follow[] @relation("UserFollowers")
 }
 
-model Follower {
-  followerId String
-  followingId String
+model Follow {
+  id           String   @id @default(uuid())
+  followerId   String
+  followingId  String
+  status       FollowStatus @default(PENDING)
+  createdAt    DateTime @default(now())
 
-  follower   User @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
-  following  User @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+  follower   User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following  User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
 
-  @@id([followerId, followingId])
-  @@map("followers")
+  @@unique([followerId, followingId])
+}
+
+enum FollowStatus {
+  PENDING
+  ACCEPTED
 }
 
 model Post {
