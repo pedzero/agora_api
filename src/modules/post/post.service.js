@@ -3,7 +3,7 @@ import { deleteImage, uploadImage } from '../../lib/upload.js';
 import { ConflictError, NotFoundError, UnauthorizedError } from '../../utils/errors.js';
 import { getFileNameFromURL } from '../../utils/filename.js';
 
-export async function getPostById(postId) {
+export async function getPostById(requesterId, postId) {
     const post = await prisma.post.findUnique({
         where: { id: postId },
         include: { photos: true },
@@ -11,6 +11,21 @@ export async function getPostById(postId) {
 
     if (!post) {
         throw new NotFoundError('Post not found');
+    }
+
+    if (post.visibility === 'PRIVATE') {
+        const currentRelation = await prisma.follow.findUnique({
+            where: {
+                followerId_followingId: {
+                    followerId: requesterId,
+                    followingId: post.userId
+                }
+            }
+        });
+
+        if (!currentRelation || currentRelation?.status !== 'ACCEPTED') {
+            throw new UnauthorizedError('Access denied. This post is private');
+        }
     }
 
     return post;
@@ -80,7 +95,6 @@ export async function getFeedForAuthenticatedUser({ userId, page = 1, limit = 10
 
     return [...followedPosts, ...publicPosts];
 }
-
 
 export async function getPublicFeed() {
     return prisma.post.findMany({

@@ -1,12 +1,12 @@
 import { createPostSchema, updatePostSchema } from './post.schema.js';
 import * as PostService from './post.service.js';
-import { z } from 'zod';
 
 export async function getPost(request, response, next) {
     try {
+        const userId = request.user.id;
         const { postId } = request.params;
 
-        const post = await PostService.getPostById(postId);
+        const post = await PostService.getPostById(userId, postId);
         response.status(200).json(post);
     } catch (error) {
         next(error);
@@ -17,8 +17,6 @@ export async function feed(request, response, next) {
     try {
         const userId = request.user?.id;
         const { page = 1, limit = 10 } = request.query;
-
-        console.log(userId)
 
         let posts;
         if (userId) {
@@ -31,8 +29,8 @@ export async function feed(request, response, next) {
             posts = await PostService.getPublicFeed();
         }
         response.json(posts);
-    } catch (err) {
-        next(err);
+    } catch (error) {
+        next(error);
     }
 }
 
