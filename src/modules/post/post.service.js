@@ -103,6 +103,14 @@ export async function getPublicFeed() {
 }
 
 export async function createPost({ userId, description, latitude, longitude, visibility, files }) {
+    if (!files || files.length === 0) {
+        return UnauthorizedError('At least one photo must be uploaded.');
+    }
+
+    if (files.length > 3) {
+        return UnauthorizedError('You can upload up to 3 photos per post.');
+    }
+
     const uploadedPhotos = [];
 
     for (const file of files) {

@@ -14,15 +14,21 @@ const visibilitySchema = z.preprocess(
 export const createPostSchema = z.object({
     description: z.string().max(500).optional(),
 
-    latitude: z.number({
-        required_error: 'Latitude is required',
-        invalid_type_error: 'Latitude must be a number',
-    }),
+    latitude: z.preprocess(
+        (value) => (typeof value === 'string' ? parseFloat(value) : value),
+        z.number({
+            required_error: 'Latitude is required',
+            invalid_type_error: 'Latitude must be a number',
+        })
+    ),
 
-    longitude: z.number({
-        required_error: 'Longitude is required',
-        invalid_type_error: 'Longitude must be a number',
-    }),
+    longitude: z.preprocess(
+        (value) => (typeof value === 'string' ? parseFloat(value) : value),
+        z.number({
+            required_error: 'Longitude is required',
+            invalid_type_error: 'Longitude must be a number',
+        })
+    ),
 
     visibility: visibilitySchema,
 });
