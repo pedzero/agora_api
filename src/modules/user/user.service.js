@@ -151,8 +151,11 @@ export async function getFollowersByUsername(username) {
         throw new NotFoundError('User not found');
     }
 
-    const followers = await prisma.follower.findMany({
-        where: { followingId: user.id },
+    const followers = await prisma.follow.findMany({
+        where: {
+            followingId: user.id,
+            status: 'ACCEPTED'
+        },
         include: {
             follower: {
                 select: {
@@ -177,8 +180,11 @@ export async function getFollowingsByUsername(username) {
         throw new NotFoundError('User not found');
     }
 
-    const followings = await prisma.follower.findMany({
-        where: { followerId: user.id },
+    const followings = await prisma.follow.findMany({
+        where: {
+            followerId: user.id,
+            status: 'ACCEPTED'
+        },
         include: {
             following: {
                 select: {

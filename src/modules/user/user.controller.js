@@ -75,6 +75,7 @@ export async function getUserPosts(request, response, next) {
 export async function getFollowers(request, response, next) {
     try {
         const { username } = request.params;
+
         const followers = await UserService.getFollowersByUsername(username);
         return response.json({ followers });
     } catch (error) {
@@ -85,6 +86,7 @@ export async function getFollowers(request, response, next) {
 export async function getFollowings(request, response, next) {
     try {
         const { username } = request.params;
+        
         const followings = await UserService.getFollowingsByUsername(username);
         return response.json({ followings });
     } catch (error) {
@@ -119,7 +121,7 @@ export async function unfollow(request, response, next) {
     try {
         const { username } = request.params;
         const userId = request.user.id;
-        
+
         const result = await UserService.unfollowUserByUsername(userId, username);
         return response.json(result);
     } catch (error) {
