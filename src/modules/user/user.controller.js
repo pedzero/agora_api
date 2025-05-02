@@ -64,8 +64,9 @@ export async function getUser(request, response, next) {
 export async function getUserPosts(request, response, next) {
     try {
         const { username } = request.params;
+        const userId = request.user.id;
 
-        const posts = await UserService.getUserPosts(username);
+        const posts = await UserService.getUserPosts(userId, username);
         return response.json({ posts });
     } catch (error) {
         next(error);

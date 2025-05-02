@@ -122,7 +122,7 @@ export async function getUserByUsername(username) {
     });
 }
 
-export async function getUserPosts(username) {
+export async function getUserPosts(requesterId, username) {
     if (!username) {
         throw new BadRequestError('Username is required');
     }
@@ -133,6 +133,25 @@ export async function getUserPosts(username) {
 
     if (!user) {
         throw new NotFoundError('User not found');
+    }
+
+    const currentRelation = await prisma.follow.findUnique({
+        where: {
+            followerId_followingId: {
+                followerId: requesterId,
+                followingId: user.id
+            }
+        }
+    });
+
+    if (requesterId !== user.id && (!currentRelation || currentRelation?.status === 'PENDING')) {
+        return await prisma.post.findMany({
+            where: {
+                userId: user.id,
+                visibility: 'PUBLIC'
+            },
+            include: { photos: true },
+        });
     }
 
     return await prisma.post.findMany({
