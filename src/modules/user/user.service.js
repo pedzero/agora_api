@@ -193,6 +193,26 @@ export async function getFollowingsByUsername(username) {
     return followings.map(entry => entry.following);
 }
 
+export async function getFollowRequests(userId) {
+    const followRequests = await prisma.follow.findMany({
+        where: {
+            followingId: userId,
+            status: 'PENDING'
+        },
+        include: {
+            follower: {
+                select: {
+                    name: true,
+                    username: true,
+                    profilePicture: true
+                }
+            }
+        }
+    });
+
+    return followRequests;
+}
+
 export async function createFollowRequest(followerId, username) {
     const targetUser = await prisma.user.findUnique({
         where: { username },

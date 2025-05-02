@@ -92,6 +92,17 @@ export async function getFollowings(request, response, next) {
     }
 }
 
+export async function getFollowRequests(request, response, next) {
+    try {
+        const userId = request.user.id;
+
+        const followRequests = await UserService.getFollowRequests(userId);
+        return response.json({ followRequests });
+    } catch (error) {
+        return next(error);
+    }
+}
+
 export async function follow(request, response, next) {
     try {
         const { username } = request.params;
