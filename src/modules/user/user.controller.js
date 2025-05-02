@@ -61,6 +61,17 @@ export async function getUser(request, response, next) {
     }
 }
 
+export async function getUserPosts(request, response, next) {
+    try {
+        const { username } = request.params;
+
+        const posts = await UserService.getUserPosts(username);
+        return response.json({ posts });
+    } catch (error) {
+        next(error);
+    }
+}
+
 export async function getFollowers(request, response, next) {
     try {
         const { username } = request.params;

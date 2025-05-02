@@ -122,6 +122,25 @@ export async function getUserByUsername(username) {
     });
 }
 
+export async function getUserPosts(username) {
+    if (!username) {
+        throw new BadRequestError('Username is required');
+    }
+
+    const user = await prisma.user.findUnique({
+        where: { username },
+    });
+
+    if (!user) {
+        throw new NotFoundError('User not found');
+    }
+
+    return await prisma.post.findMany({
+        where: { userId: user.id },
+        include: { photos: true },
+    });
+}
+
 export async function getFollowersByUsername(username) {
     const user = await prisma.user.findUnique({
         where: { username },
