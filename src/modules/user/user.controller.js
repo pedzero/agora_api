@@ -86,7 +86,7 @@ export async function getFollowers(request, response, next) {
 export async function getFollowings(request, response, next) {
     try {
         const { username } = request.params;
-        
+
         const followings = await UserService.getFollowingsByUsername(username);
         return response.json({ followings });
     } catch (error) {
@@ -147,6 +147,18 @@ export async function rejectFollowRequest(request, response, next) {
         const userId = request.user.id;
 
         const result = await UserService.rejectFollowRequest(userId, username);
+        return response.json(result);
+    } catch (error) {
+        return next(error);
+    }
+}
+
+export async function removeFollower(request, response, next) {
+    try {
+        const { username } = request.params;
+        const userId = request.user.id;
+
+        const result = await UserService.removeFollower(userId, username);
         return response.json(result);
     } catch (error) {
         return next(error);

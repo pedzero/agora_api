@@ -403,3 +403,44 @@ export async function rejectFollowRequest(followedId, username) {
         message: `Follow request from @${username} rejected`
     };
 }
+
+export async function removeFollower(followedId, username) {
+    const followerUser = await prisma.user.findUnique({
+        where: { username },
+        select: { id: true }
+    });
+
+    if (!followerUser) {
+        throw new NotFoundError('User not found');
+    }
+
+    const currentRelation = await prisma.follow.findUnique({
+        where: {
+            followerId_followingId: {
+                followerId: followerUser.id,
+                followingId: followedId
+            }
+        }
+    });
+
+    if (!currentRelation) {
+        throw new NotFoundError('Follow request does not exist');
+    }
+
+    if (currentRelation.status === 'PENDING') {
+        throw new ConflictError('Request not accepted yet');
+    }
+
+    await prisma.follow.delete({
+        where: {
+            followerId_followingId: {
+                followerId: followerUser.id,
+                followingId: followedId
+            }
+        }
+    });
+
+    return {
+        message: `@${username} does not follow you anymore`
+    };
+}
