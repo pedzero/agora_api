@@ -41,7 +41,7 @@ export async function getFeed({ userId, page = 1, limit = 10 }) {
 }
 
 
-export async function createPost({ userId, description, latitude, longitude, files }) {
+export async function createPost({ userId, description, latitude, longitude, visibility, files }) {
     const uploadedPhotos = [];
 
     for (const file of files) {
@@ -55,6 +55,7 @@ export async function createPost({ userId, description, latitude, longitude, fil
             description,
             latitude,
             longitude,
+            visibility,
             user: {
                 connect: { id: userId }
             },
@@ -72,7 +73,7 @@ export async function createPost({ userId, description, latitude, longitude, fil
     return post;
 }
 
-export async function updatePost({ userId, postId, description, removePhotos = [], files = [] }) {
+export async function updatePost({ userId, postId, description, visibility, removePhotos = [], files = [] }) {
     const post = await prisma.post.findUnique({
         where: { id: postId },
         include: { photos: true },
@@ -120,6 +121,7 @@ export async function updatePost({ userId, postId, description, removePhotos = [
         where: { id: postId },
         data: {
             description,
+            visibility,
             photos: {
                 create: uploadedPhotoUrls.map((url) => ({ url })),
             },
