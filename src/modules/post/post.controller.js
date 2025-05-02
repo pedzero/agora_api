@@ -16,6 +16,24 @@ export async function getPost(request, response, next) {
     }
 }
 
+export async function feed(request, response, next) {
+    try {
+        const userId = request.user.id;
+        const { page = 1, limit = 10 } = request.query;
+
+        const posts = await PostService.getFeed({
+            userId,
+            page: Number(page),
+            limit: Number(limit),
+        });
+
+        response.json(posts);
+    } catch (err) {
+        next(err);
+    }
+}
+
+
 export async function createPost(request, response, next) {
     try {
         request.body.latitude = parseFloat(request.body.latitude);

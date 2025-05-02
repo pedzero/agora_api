@@ -16,6 +16,31 @@ export async function getPostById(postId) {
     return post;
 }
 
+export async function getFeed({ userId, page = 1, limit = 10 }) {
+    const skip = (page - 1) * limit;
+
+    const followedUsers = await prisma.follower.findMany({
+        where: { followerId: userId },
+        select: { followingId: true },
+    });
+
+    const followedIds = followedUsers.map(f => f.followingId);
+
+    return prisma.post.findMany({
+        where: {
+            userId: { in: followedIds },
+        },
+        include: {
+            user: true,
+            photos: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+    });
+}
+
+
 export async function createPost({ userId, description, latitude, longitude, files }) {
     const uploadedPhotos = [];
 

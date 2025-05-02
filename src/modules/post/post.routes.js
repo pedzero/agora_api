@@ -6,8 +6,8 @@ import * as PostController from './post.controller.js';
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
+router.get('/feed', authenticate, PostController.feed);
 router.get('/:postId', authenticate, PostController.getPost);
-// GET      /feed
 router.post('/', authenticate, upload.array('photos'), PostController.createPost);
 router.patch('/:postId', authenticate, upload.array('photos'), PostController.updatePost);
 router.delete('/:postId', authenticate, PostController.deletePost);
