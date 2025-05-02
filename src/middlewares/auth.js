@@ -6,7 +6,7 @@ import { getTokenFromHeader } from '../utils/token.js';
 
 export async function authenticate(request, response, next) {
     const token = getTokenFromHeader(request);
-    
+
     if (!token) {
         throw new UnauthorizedError('Missing or invalid authorization header');
     }
@@ -25,4 +25,32 @@ export async function authenticate(request, response, next) {
     } catch {
         throw new UnauthorizedError('Invalid or expired token');
     }
+}
+
+export async function optionalAuth(request, response, next) {
+    const token = getTokenFromHeader(request);
+
+    let authenticated = true;
+    if (!token) {
+        authenticated = false;
+    }
+
+    if (await isTokenBlacklisted(token)) {
+        authenticated = false;
+    }
+
+    if (authenticated) {
+        try {
+            const payload = jwt.verify(token, JWT_SECRET);
+            request.user = {
+                id: payload.sub,
+                email: payload.email
+            };
+        } catch (error) {
+            request.user = null;
+        }
+    } else {
+        request.user = null;
+    }
+    next();
 }

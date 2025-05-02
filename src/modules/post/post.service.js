@@ -16,30 +16,91 @@ export async function getPostById(postId) {
     return post;
 }
 
-export async function getFeed({ userId, page = 1, limit = 10 }) {
+export async function getFeedForAuthenticatedUser({ userId, page = 1, limit = 10 }) {
     const skip = (page - 1) * limit;
 
-    const followedUsers = await prisma.follower.findMany({
-        where: { followerId: userId },
+    // followed users
+    const followedUsers = await prisma.follow.findMany({
+        where: {
+            followerId: userId,
+            status: 'ACCEPTED',
+        },
         select: { followingId: true },
     });
 
     const followedIds = followedUsers.map(f => f.followingId);
 
-    return prisma.post.findMany({
+    // followed users posts
+    const followedPosts = await prisma.post.findMany({
         where: {
             userId: { in: followedIds },
         },
         include: {
-            user: true,
+            user: {
+                select: {
+                    username: true,
+                    name: true,
+                    profilePicture: true,
+                },
+            },
             photos: true,
         },
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
     });
+
+    if (followedPosts.length >= limit) {
+        return followedPosts;
+    }
+
+    // search for more public posts when needed
+    const remaining = limit - followedPosts.length;
+    const excludedPostIds = followedPosts.map(p => p.id);
+
+    const publicPosts = await prisma.post.findMany({
+        where: {
+            userId: { notIn: followedIds.concat(userId) },
+            id: { notIn: excludedPostIds },
+            visibility: 'PUBLIC',
+        },
+        include: {
+            user: {
+                select: {
+                    username: true,
+                    name: true,
+                    profilePicture: true,
+                },
+            },
+            photos: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        take: remaining,
+    });
+
+    return [...followedPosts, ...publicPosts];
 }
 
+
+export async function getPublicFeed() {
+    return prisma.post.findMany({
+        where: {
+            visibility: 'PUBLIC',
+        },
+        include: {
+            user: {
+                select: {
+                    username: true,
+                    name: true,
+                    profilePicture: true,
+                },
+            },
+            photos: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+    });
+}
 
 export async function createPost({ userId, description, latitude, longitude, visibility, files }) {
     const uploadedPhotos = [];

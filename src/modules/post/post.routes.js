@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { authenticate } from '../../middlewares/auth.js';
+import { authenticate, optionalAuth } from '../../middlewares/auth.js';
 import * as PostController from './post.controller.js';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.get('/feed', authenticate, PostController.feed);
+router.get('/feed', optionalAuth, PostController.feed);
 router.get('/:postId', authenticate, PostController.getPost);
 router.post('/', authenticate, upload.array('photos'), PostController.createPost);
 router.patch('/:postId', authenticate, upload.array('photos'), PostController.updatePost);

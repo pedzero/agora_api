@@ -18,15 +18,21 @@ export async function getPost(request, response, next) {
 
 export async function feed(request, response, next) {
     try {
-        const userId = request.user.id;
+        const userId = request.user?.id;
         const { page = 1, limit = 10 } = request.query;
 
-        const posts = await PostService.getFeed({
-            userId,
-            page: Number(page),
-            limit: Number(limit),
-        });
+        console.log(userId)
 
+        let posts;
+        if (userId) {
+            posts = await PostService.getFeedForAuthenticatedUser({
+                userId,
+                page: Number(page),
+                limit: Number(limit),
+            });
+        } else {
+            posts = await PostService.getPublicFeed();
+        }
         response.json(posts);
     } catch (err) {
         next(err);
