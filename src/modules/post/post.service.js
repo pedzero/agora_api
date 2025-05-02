@@ -3,6 +3,19 @@ import { deleteImage, uploadImage } from '../../lib/upload.js';
 import { ConflictError, NotFoundError, UnauthorizedError } from '../../utils/errors.js';
 import { getFileNameFromURL } from '../../utils/filename.js';
 
+export async function getPostById(postId) {
+    const post = await prisma.post.findUnique({
+        where: { id: postId },
+        include: { photos: true },
+    });
+
+    if (!post) {
+        throw new NotFoundError('Post not found');
+    }
+
+    return post;
+}
+
 export async function createPost({ userId, description, latitude, longitude, files }) {
     const uploadedPhotos = [];
 

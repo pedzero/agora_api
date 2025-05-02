@@ -2,6 +2,20 @@ import { createPostSchema, updatePostSchema } from './post.schema.js';
 import * as PostService from './post.service.js';
 import { z } from 'zod';
 
+export async function getPost(request, response, next) {
+    try {
+        const postId = request.params.postId;
+
+        const post = await PostService.getPostById(postId);
+        response.status(200).json(post);
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            return response.status(400).json({ errors: error.errors });
+        }
+        next(error);
+    }
+}
+
 export async function createPost(request, response, next) {
     try {
         request.body.latitude = parseFloat(request.body.latitude);

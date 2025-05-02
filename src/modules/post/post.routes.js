@@ -8,7 +8,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // GET      /users/:username/posts
 
-// GET      /:postId
+router.get('/:postId', authenticate, PostController.getPost);
 // GET      /feed
 router.post('/', authenticate, upload.array('photos'), PostController.createPost);
 router.patch('/:postId', authenticate, upload.array('photos'), PostController.updatePost);
