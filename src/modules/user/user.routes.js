@@ -15,6 +15,7 @@ router.get('/search', authenticate, UserController.searchUsers);
 router.get('/:username', authenticate, UserController.getUser);
 
 router.post('/:username/follow', authenticate, UserController.follow);
+router.post('/:username/follow-requests/accept', authenticate, UserController.acceptFollowRequest);
 
 //router.get('/:username/posts', authenticate, UserController.getUserPosts);
 //router.get('/:username/followers', authenticate, UserController.getFollowers);

@@ -115,6 +115,18 @@ export async function follow(request, response, next) {
     }
 }
 
+export async function acceptFollowRequest(request, response, next) {
+    try {
+        const { username } = request.params;
+        const userId = request.user.id;
+
+        const result = await UserService.acceptFollowRequest(userId, username);
+        return response.json(result);
+    } catch (error) {
+        return next(error);
+    }
+}
+
 export async function unfollow(request, response, next) {
     try {
         const { username } = request.params;

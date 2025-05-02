@@ -264,6 +264,52 @@ export async function createFollowRequest(followerId, username) {
     };
 }
 
+export async function acceptFollowRequest(followedId, username) {
+    const followerUser = await prisma.user.findUnique({
+        where: { username },
+        select: { id: true }
+    });
+
+    if (!followerUser) {
+        throw new NotFoundError('User not found');
+    }
+
+    const currentRelation = await prisma.follow.findUnique({
+        where: {
+            followerId_followingId: {
+                followerId: followerUser.id,
+                followingId: followedId
+            }
+        }
+    });
+
+    if (!currentRelation) {
+        throw new NotFoundError('Follow request does not exist');
+    }
+
+    if (currentRelation.status === 'ACCEPTED') {
+        throw new ConflictError('User already follows you');
+    }
+    
+    const newRelation = await prisma.follow.update({
+        where: {
+            followerId_followingId: {
+                followerId: followerUser.id,
+                followingId: followedId
+            }
+        },
+        data: { status: 'ACCEPTED', },
+        select: {
+            status: true
+        }
+    });
+
+    return {
+        message: `Follow request from @${username} accepted`,
+        status: newRelation.status
+    };
+}
+
 export async function unfollowUserByUsername(currentUserId, username) {
     const targetUser = await prisma.user.findUnique({
         where: { username },
