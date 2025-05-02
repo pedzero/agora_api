@@ -13,15 +13,13 @@ router.get('/me/follow-requests', authenticate, UserController.getFollowRequests
 
 router.get('/search', authenticate, UserController.searchUsers);
 router.get('/:username', authenticate, UserController.getUser);
-
-router.post('/:username/follow', authenticate, UserController.follow);
-router.post('/:username/follow-requests/accept', authenticate, UserController.acceptFollowRequest);
-router.delete('/:username/follow-requests/reject', authenticate, UserController.rejectFollowRequest);
-
 //router.get('/:username/posts', authenticate, UserController.getUserPosts);
 //router.get('/:username/followers', authenticate, UserController.getFollowers);
 //router.get('/:username/followings', authenticate, UserController.getFollowings);
 
-//router.delete('/:username/follow', authenticate, UserController.unfollow);
+router.post('/:username/follow', authenticate, UserController.follow);
+router.delete('/:username/unfollow', authenticate, UserController.unfollow);
+router.post('/:username/follow-requests/accept', authenticate, UserController.acceptFollowRequest);
+router.delete('/:username/follow-requests/reject', authenticate, UserController.rejectFollowRequest);
 
 export default router;

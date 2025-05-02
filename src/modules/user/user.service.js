@@ -264,6 +264,53 @@ export async function createFollowRequest(followerId, username) {
     };
 }
 
+export async function unfollowUserByUsername(followerId, username) {
+    const targetUser = await prisma.user.findUnique({
+        where: { username },
+        select: { id: true }
+    });
+
+    if (!targetUser) {
+        throw new NotFoundError('Target user not found');
+    }
+
+    if (followerId === targetUser.id) {
+        throw new BadRequestError('You cannot unfollow yourself');
+    }
+
+    const currentRelation = await prisma.follow.findUnique({
+        where: {
+            followerId_followingId: {
+                followerId: followerId,
+                followingId: targetUser.id
+            }
+        }
+    });
+
+    if (!currentRelation) {
+        throw new ConflictError('Target user not followed yet and no follow request was found');
+    }
+
+    await prisma.follow.delete({
+        where: {
+            followerId_followingId: {
+                followerId: followerId,
+                followingId: targetUser.id
+            }
+        }
+    });
+
+    if (currentRelation.status === 'PENDING') {
+        return {
+            message: `Follow request to @${username} removed`
+        };
+    }
+
+    return {
+        message: `You are no longer following @${username}`
+    };
+}
+
 export async function acceptFollowRequest(followedId, username) {
     const followerUser = await prisma.user.findUnique({
         where: { username },
@@ -348,47 +395,5 @@ export async function rejectFollowRequest(followedId, username) {
 
     return {
         message: `Follow request from @${username} rejected`
-    };
-}
-
-export async function unfollowUserByUsername(currentUserId, username) {
-    const targetUser = await prisma.user.findUnique({
-        where: { username },
-        select: { id: true }
-    });
-
-    if (!targetUser) {
-        throw new NotFoundError('Target user not found');
-    }
-
-    if (currentUserId === targetUser.id) {
-        throw new BadRequestError('You cannot unfollow yourself');
-    }
-
-    const alreadyFollowing = await prisma.follower.findUnique({
-        where: {
-            followerId_followingId: {
-                followerId: currentUserId,
-                followingId: targetUser.id
-            }
-        }
-    });
-
-    if (!alreadyFollowing) {
-        throw new ConflictError('Target user not followed yet');
-    }
-
-    await prisma.follower.delete({
-        where: {
-            followerId_followingId: {
-                followerId: currentUserId,
-                followingId: targetUser.id
-            }
-        }
-    });
-
-    return {
-        message: `You are no longer following @${username}`,
-        following: username
     };
 }
