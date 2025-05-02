@@ -161,6 +161,10 @@ export async function getUserPosts(requesterId, username) {
 }
 
 export async function getFollowersByUsername(username) {
+    if (!username) {
+        throw new BadRequestError('Username is required');
+    }
+
     const user = await prisma.user.findUnique({
         where: { username },
         select: { id: true }
@@ -190,6 +194,10 @@ export async function getFollowersByUsername(username) {
 }
 
 export async function getFollowingsByUsername(username) {
+    if (!username) {
+        throw new BadRequestError('Username is required');
+    }
+
     const user = await prisma.user.findUnique({
         where: { username },
         select: { id: true }
@@ -239,6 +247,10 @@ export async function getFollowRequests(userId) {
 }
 
 export async function createFollowRequest(followerId, username) {
+    if (!username) {
+        throw new BadRequestError('Username is required');
+    }
+
     const targetUser = await prisma.user.findUnique({
         where: { username },
         select: { id: true }
@@ -290,6 +302,10 @@ export async function createFollowRequest(followerId, username) {
 }
 
 export async function unfollowUserByUsername(followerId, username) {
+    if (!username) {
+        throw new BadRequestError('Username is required');
+    }
+
     const targetUser = await prisma.user.findUnique({
         where: { username },
         select: { id: true }
@@ -337,6 +353,10 @@ export async function unfollowUserByUsername(followerId, username) {
 }
 
 export async function acceptFollowRequest(followedId, username) {
+    if (!username) {
+        throw new BadRequestError('Username is required');
+    }
+
     const followerUser = await prisma.user.findUnique({
         where: { username },
         select: { id: true }
@@ -383,6 +403,10 @@ export async function acceptFollowRequest(followedId, username) {
 }
 
 export async function rejectFollowRequest(followedId, username) {
+    if (!username) {
+        throw new BadRequestError('Username is required');
+    }
+
     const followerUser = await prisma.user.findUnique({
         where: { username },
         select: { id: true }
@@ -424,6 +448,10 @@ export async function rejectFollowRequest(followedId, username) {
 }
 
 export async function removeFollower(followedId, username) {
+    if (!username) {
+        throw new BadRequestError('Username is required');
+    }
+    
     const followerUser = await prisma.user.findUnique({
         where: { username },
         select: { id: true }
