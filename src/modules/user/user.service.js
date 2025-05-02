@@ -193,7 +193,7 @@ export async function getFollowingsByUsername(username) {
     return followings.map(entry => entry.following);
 }
 
-export async function followUserByUsername(currentUserId, username) {
+export async function createFollowRequest(followerId, username) {
     const targetUser = await prisma.user.findUnique({
         where: { username },
         select: { id: true }
@@ -203,37 +203,44 @@ export async function followUserByUsername(currentUserId, username) {
         throw new NotFoundError('Target user not found');
     }
 
-    if (currentUserId === targetUser.id) {
+    if (followerId === targetUser.id) {
         throw new BadRequestError('You cannot follow yourself');
     }
 
-    const alreadyFollowing = await prisma.follower.findUnique({
+    const currentRelation = await prisma.follow.findUnique({
         where: {
             followerId_followingId: {
-                followerId: currentUserId,
+                followerId: followerId,
                 followingId: targetUser.id
             }
         }
     });
 
-    if (alreadyFollowing) {
-        throw new ConflictError('Target user already followed');
+    if (currentRelation) {
+        if (currentRelation.status === 'PENDING')
+            throw new ConflictError('Follow request already exists');
+
+        if (currentRelation.status === 'ACCEPTED')
+            throw new ConflictError('User already followed');
     }
 
-    await prisma.follower.create({
+    const relation = await prisma.follow.create({
         data: {
-            followerId: currentUserId,
-            followingId: targetUser.id
+            followerId: followerId,
+            followingId: targetUser.id,
+            status: 'PENDING',
+
         },
         select: {
             followerId: true,
-            followingId: true
+            followingId: true,
+            status: true
         }
     });
 
     return {
-        message: `You are now following @${username}`,
-        following: username
+        message: `Follow request sent to @${username}`,
+        status: relation.status
     };
 }
 
