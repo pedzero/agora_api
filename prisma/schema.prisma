@@ -15,10 +15,12 @@ model User {
   username       String   @unique
   passwordHash   String
   profilePicture String?
+  reputation     Int      @default(0)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   posts          Post[]
+  votes          Vote[]
   following      Follow[] @relation("UserFollowing")
   followers      Follow[] @relation("UserFollowers")
 }
@@ -47,6 +49,7 @@ model Post {
   latitude    Float
   longitude   Float
   visibility  PostVisibility @default(PUBLIC)
+  reputation  Int       @default(0)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -54,6 +57,7 @@ model Post {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   photos    Photo[]
+  votes     Vote[]
 }
 
 enum PostVisibility {
@@ -66,4 +70,21 @@ model Photo {
   url       String
   postId    String
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model Vote {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+  type      VoteType   
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+enum VoteType {
+  UP
+  DOWN
 }
