@@ -111,7 +111,7 @@ export async function follow(request, response, next) {
         const userId = request.user.id;
 
         const result = await UserService.createFollowRequest(userId, username);
-        return response.json(result);
+        return response.status(201).json(result);
     } catch (error) {
         return next(error);
     }
@@ -135,7 +135,7 @@ export async function acceptFollowRequest(request, response, next) {
         const userId = request.user.id;
 
         const result = await UserService.acceptFollowRequest(userId, username);
-        return response.json(result);
+        return response.status(201).json(result);
     } catch (error) {
         return next(error);
     }
