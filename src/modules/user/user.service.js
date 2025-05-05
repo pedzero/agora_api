@@ -112,7 +112,7 @@ export async function getUserByUsername(username) {
         throw new BadRequestError('Username is required');
     }
 
-    return await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
         where: { username },
         select: {
             name: true,
@@ -120,6 +120,12 @@ export async function getUserByUsername(username) {
             profilePicture: true
         }
     });
+
+    if (!user) {
+        throw new NotFoundError('User not found');
+    }
+
+    return user;
 }
 
 export async function getUserPosts(requesterId, username) {
