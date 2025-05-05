@@ -13,6 +13,7 @@ export async function getOwnProfile(userId) {
             name: true,
             email: true,
             username: true,
+            reputation: true,
             profilePicture: true,
             createdAt: true,
         },
@@ -58,6 +59,7 @@ export async function updateOwnProfile(userId, data) {
             email: true,
             username: true,
             profilePicture: true,
+            reputation: true,
             createdAt: true,
         }
     });
@@ -102,6 +104,7 @@ export async function searchUsersByUsername(query) {
         select: {
             name: true,
             username: true,
+            reputation: true,
             profilePicture: true
         }
     });
@@ -117,6 +120,7 @@ export async function getUserByUsername(username) {
         select: {
             name: true,
             username: true,
+            reputation: true,
             profilePicture: true
         }
     });
@@ -190,6 +194,7 @@ export async function getFollowersByUsername(username) {
                 select: {
                     name: true,
                     username: true,
+                    reputation: true,
                     profilePicture: true
                 }
             }
@@ -223,6 +228,7 @@ export async function getFollowingsByUsername(username) {
                 select: {
                     name: true,
                     username: true,
+                    reputation: true,
                     profilePicture: true
                 }
             }
@@ -243,6 +249,7 @@ export async function getFollowRequests(userId) {
                 select: {
                     name: true,
                     username: true,
+                    reputation: true,
                     profilePicture: true
                 }
             }
@@ -457,7 +464,7 @@ export async function removeFollower(followedId, username) {
     if (!username) {
         throw new BadRequestError('Username is required');
     }
-    
+
     const followerUser = await prisma.user.findUnique({
         where: { username },
         select: { id: true }
