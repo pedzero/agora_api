@@ -9,7 +9,6 @@ export async function getOwnProfile(userId) {
     const user = await prisma.user.findUnique({
         where: { id: userId },
         select: {
-            id: true,
             name: true,
             email: true,
             username: true,
@@ -54,12 +53,11 @@ export async function updateOwnProfile(userId, data) {
         where: { id: userId },
         data: updatedData,
         select: {
-            id: true,
             name: true,
             email: true,
             username: true,
-            profilePicture: true,
             reputation: true,
+            profilePicture: true,
             createdAt: true,
         }
     });
@@ -160,13 +158,39 @@ export async function getUserPosts(requesterId, username) {
                 userId: user.id,
                 visibility: 'PUBLIC'
             },
-            include: { photos: true },
+            select: {
+                id: true,
+                description: true,
+                latitude: true,
+                longitude: true,
+                visibility: true,
+                createdAt: true,
+                updatedAt: true,
+                photos: {
+                    select: {
+                        url: true
+                    }
+                }
+            },
         });
     }
 
     return await prisma.post.findMany({
         where: { userId: user.id },
-        include: { photos: true },
+        select: {
+            id: true,
+            description: true,
+            latitude: true,
+            longitude: true,
+            visibility: true,
+            createdAt: true,
+            updatedAt: true,
+            photos: {
+                select: {
+                    url: true
+                }
+            }
+        },
     });
 }
 
@@ -244,7 +268,9 @@ export async function getFollowRequests(userId) {
             followingId: userId,
             status: 'PENDING'
         },
-        include: {
+        select: {
+            status: true,
+            createdAt: true,
             follower: {
                 select: {
                     name: true,
