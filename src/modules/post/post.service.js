@@ -6,7 +6,20 @@ import { getFileNameFromURL } from '../../utils/filename.js';
 export async function getPostById(requesterId, postId) {
     const post = await prisma.post.findUnique({
         where: { id: postId },
-        include: { photos: true },
+        select: {
+            id: true,
+            description: true,
+            latitude: true,
+            longitude: true,
+            visibility: true,
+            createdAt: true,
+            updatedAt: true,
+            photos: {
+                select: {
+                    url: true
+                }
+            }
+        },
     });
 
     if (!post) {
@@ -50,7 +63,14 @@ export async function getFeedForAuthenticatedUser({ userId, page = 1, limit = 10
         where: {
             userId: { in: followedIds },
         },
-        include: {
+        select: { 
+            id: true,
+            description: true,
+            latitude: true,
+            longitude: true,
+            visibility: true,
+            createdAt: true,
+            updatedAt: true,
             user: {
                 select: {
                     username: true,
@@ -58,7 +78,11 @@ export async function getFeedForAuthenticatedUser({ userId, page = 1, limit = 10
                     profilePicture: true,
                 },
             },
-            photos: true,
+            photos: {
+                select: {
+                    url: true
+                }
+            }
         },
         orderBy: { createdAt: 'desc' },
         skip,
@@ -79,7 +103,14 @@ export async function getFeedForAuthenticatedUser({ userId, page = 1, limit = 10
             id: { notIn: excludedPostIds },
             visibility: 'PUBLIC',
         },
-        include: {
+        select: { 
+            id: true,
+            description: true,
+            latitude: true,
+            longitude: true,
+            visibility: true,
+            createdAt: true,
+            updatedAt: true,
             user: {
                 select: {
                     username: true,
@@ -87,7 +118,11 @@ export async function getFeedForAuthenticatedUser({ userId, page = 1, limit = 10
                     profilePicture: true,
                 },
             },
-            photos: true,
+            photos: {
+                select: {
+                    url: true
+                }
+            }
         },
         orderBy: { createdAt: 'desc' },
         take: remaining,
@@ -101,7 +136,14 @@ export async function getPublicFeed() {
         where: {
             visibility: 'PUBLIC',
         },
-        include: {
+        select: { 
+            id: true,
+            description: true,
+            latitude: true,
+            longitude: true,
+            visibility: true,
+            createdAt: true,
+            updatedAt: true,
             user: {
                 select: {
                     username: true,
@@ -109,7 +151,11 @@ export async function getPublicFeed() {
                     profilePicture: true,
                 },
             },
-            photos: true,
+            photos: {
+                select: {
+                    url: true
+                }
+            }
         },
         orderBy: { createdAt: 'desc' },
         take: 10,
@@ -148,8 +194,19 @@ export async function createPost({ userId, description, latitude, longitude, vis
                 }))
             }
         },
-        include: {
-            photos: true
+        select: {
+            id: true,
+            description: true,
+            latitude: true,
+            longitude: true,
+            visibility: true,
+            createdAt: true,
+            updatedAt: true,
+            photos: {
+                select: {
+                    url: true
+                }
+            }
         }
     });
 
@@ -209,7 +266,27 @@ export async function updatePost({ userId, postId, description, visibility, remo
                 create: uploadedPhotoUrls.map((url) => ({ url })),
             },
         },
-        include: { photos: true },
+        select: { 
+            id: true,
+            description: true,
+            latitude: true,
+            longitude: true,
+            visibility: true,
+            createdAt: true,
+            updatedAt: true,
+            user: {
+                select: {
+                    username: true,
+                    name: true,
+                    profilePicture: true,
+                },
+            },
+            photos: {
+                select: {
+                    url: true
+                }
+            }
+        },
     });
 
     return updatedPost;
