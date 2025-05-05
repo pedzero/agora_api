@@ -242,3 +242,247 @@ export async function deletePost(userId, postId) {
 
     return { message: 'Post deleted successfully' };
 }
+
+export async function upvotePost(userId, postId) {
+    const post = await prisma.post.findUnique({
+        where: { id: postId },
+        include: { user: true },
+    });
+
+    if (!post) {
+        throw new NotFoundError('Post not found');
+    }
+
+    const hasAccess = await canUserAccessPost(userId, post);
+    if (!hasAccess) {
+        throw new UnauthorizedError('Access denied')
+    }
+
+    const existingVote = await prisma.vote.findUnique({
+        where: {
+            userId_postId: {
+                userId,
+                postId: post.id,
+            },
+        },
+    });
+
+    if (existingVote?.type === 'UP') {
+        throw new ConflictError('Post already upvoted');
+    }
+
+    const tx = [];
+
+    if (!existingVote) {
+        tx.push(
+            prisma.vote.create({
+                data: { userId, postId: post.id, type: 'UP' },
+            }),
+            prisma.post.update({
+                where: { id: post.id },
+                data: { reputation: { increment: 1 } },
+            })
+        );
+
+        if (userId !== post.userId) {
+            tx.push(
+                prisma.user.update({
+                    where: { id: post.userId },
+                    data: { reputation: { increment: 1 } },
+                })
+            );
+        }
+
+        await prisma.$transaction(tx);
+        return { message: 'Post upvoted' };
+    }
+
+    if (existingVote.type === 'DOWN') {
+        tx.push(
+            prisma.vote.update({
+                where: { id: existingVote.id },
+                data: { type: 'UP' },
+            }),
+            prisma.post.update({
+                where: { id: post.id },
+                data: { reputation: { increment: 2 } },
+            })
+        );
+
+        if (userId !== post.userId) {
+            tx.push(
+                prisma.user.update({
+                    where: { id: post.userId },
+                    data: { reputation: { increment: 1 } },
+                })
+            );
+        }
+
+        await prisma.$transaction(tx);
+        return { message: 'Vote changed to upvote' };
+    }
+}
+
+export async function downvotePost(userId, postId) {
+    const post = await prisma.post.findUnique({
+        where: { id: postId },
+        include: { user: true },
+    });
+
+    if (!post) {
+        throw new NotFoundError('Post not found');
+    }
+
+    const hasAccess = await canUserAccessPost(userId, post);
+    if (!hasAccess) {
+        throw new UnauthorizedError('Access denied')
+    }
+
+    const existingVote = await prisma.vote.findUnique({
+        where: {
+            userId_postId: {
+                userId,
+                postId: post.id,
+            },
+        },
+    });
+
+    if (existingVote?.type === 'DOWN') {
+        throw new ConflictError('Post already downvoted');
+    }
+
+    const tx = [];
+
+    if (!existingVote) {
+        tx.push(
+            prisma.vote.create({
+                data: { userId, postId: post.id, type: 'DOWN' },
+            }),
+            prisma.post.update({
+                where: { id: post.id },
+                data: { reputation: { decrement: 1 } },
+            })
+        );
+
+        await prisma.$transaction(tx);
+        return { message: 'Post downvoted' };
+    }
+
+    if (existingVote.type === 'UP') {
+        tx.push(
+            prisma.vote.update({
+                where: { id: existingVote.id },
+                data: { type: 'DOWN' },
+            }),
+            prisma.post.update({
+                where: { id: post.id },
+                data: { reputation: { decrement: 2 } },
+            })
+        );
+
+        if (userId !== post.userId) {
+            tx.push(
+                prisma.user.update({
+                    where: { id: post.userId },
+                    data: { reputation: { decrement: 1 } },
+                })
+            );
+        }
+
+        await prisma.$transaction(tx);
+        return { message: 'Vote changed to downvote' };
+    }
+}
+
+export async function removeVote(userId, postId) {
+    const post = await prisma.post.findUnique({
+        where: { id: postId },
+        include: { user: true },
+    });
+
+    if (!post) {
+        throw new NotFoundError('Post not found');
+    }
+
+    const hasAccess = await canUserAccessPost(userId, post);
+    if (!hasAccess) {
+        throw new UnauthorizedError('Access denied')
+    }
+
+    const existingVote = await prisma.vote.findUnique({
+        where: {
+            userId_postId: {
+                userId,
+                postId: post.id,
+            },
+        },
+    });
+
+    if (!existingVote) {
+        throw new NotFoundError('No existing vote to remove');
+    }
+
+    const updates = [];
+
+    updates.push(
+        prisma.vote.delete({
+            where: { id: existingVote.id },
+        })
+    );
+
+    if (existingVote.type === 'UP') {
+        updates.push(
+            prisma.post.update({
+                where: { id: post.id },
+                data: { reputation: { decrement: 1 } },
+            })
+        );
+
+        if (userId !== post.userId) {
+            updates.push(
+                prisma.user.update({
+                    where: { id: post.userId },
+                    data: { reputation: { decrement: 1 } },
+                })
+            );
+        }
+    }
+
+    if (existingVote.type === 'DOWN') {
+        updates.push(
+            prisma.post.update({
+                where: { id: post.id },
+                data: { reputation: { increment: 1 } },
+            })
+        );
+    }
+
+    await prisma.$transaction(updates);
+
+    return { message: 'Vote removed' };
+}
+
+async function canUserAccessPost(userId, post) {
+    if (post.visibility === 'PUBLIC') {
+        return true;
+    }
+
+    if (userId === post.userId) {
+        return true;
+    }
+
+    const currentRelation = await prisma.follow.findUnique({
+        where: {
+            followerId_followingId: {
+                followerId: userId,
+                followingId: post.userId
+            }
+        }
+    });
+
+    if (currentRelation?.status === 'ACCEPTED') {
+        return true;
+    }
+
+    return false;
+}

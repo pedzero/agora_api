@@ -75,3 +75,39 @@ export async function deletePost(request, response, next) {
         next(error);
     }
 }
+
+export async function upvotePost(request, response, next) {
+    try {
+        const { postId } = request.params;
+        const userId = request.user.id;
+
+        const message = await PostService.upvotePost(userId, postId);
+        response.status(201).json(message);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function downvotePost(request, response, next) {
+    try {
+        const { postId } = request.params;
+        const userId = request.user.id;
+
+        const message = await PostService.downvotePost(userId, postId);
+        response.status(201).json(message);
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function removeVote(request, response, next) {
+    try {
+        const { postId } = request.params;
+        const userId = request.user.id;
+
+        const message = await PostService.removeVote(userId, postId);
+        response.status(200).json(message);
+    } catch (error) {
+        next(error);
+    }
+}

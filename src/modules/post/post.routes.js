@@ -85,4 +85,42 @@ router.patch('/:postId', authenticate, upload.array('photos'), PostController.up
  */
 router.delete('/:postId', authenticate, PostController.deletePost);
 
+/**
+ * POST /posts/{postId}/upvote
+ * @summary Upvote a post
+ * @tags Posts
+ * @param {string} path.postId.required - Post ID
+ * @security bearerAuth
+ * @return {object} 201 - Post upvoted successfully
+ * @return {object} 401 - Invalid or missing authentication token or Access denied
+ * @return {object} 404 - Post not found
+ * @return {object} 409 - Post already upvoted
+ */
+router.post('/:postId/upvote', authenticate, PostController.upvotePost);
+
+/**
+ * POST /posts/{postId}/downvote
+ * @summary Downvote a post
+ * @tags Posts
+ * @param {string} path.postId.required - Post ID
+ * @security bearerAuth
+ * @return {object} 201 - Post downvoted successfully
+ * @return {object} 401 - Invalid or missing authentication token or Access denied
+ * @return {object} 404 - Post not found
+ * @return {object} 409 - Post already downvoted
+ */
+router.post('/:postId/downvote', authenticate, PostController.downvotePost);
+
+/**
+ * DELETE /posts/{postId}/vote
+ * @summary Remove vote from post
+ * @tags Posts
+ * @param {string} path.postId.required - Post ID
+ * @security bearerAuth
+ * @return {object} 200 - Vote removed successfully
+ * @return {object} 401 - Invalid or missing authentication token or Access denied
+ * @return {object} 404 - Post not found or Vote not found
+ */
+router.delete('/:postId/vote', authenticate, PostController.removeVote);
+
 export default router;
